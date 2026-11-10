@@ -1,0 +1,124 @@
+# Insper RISC-V Live
+
+VS Code buttons and project templates for programming the Insper RV32 processor
+in C and Rust. The processor, runtime, compiler integration and FPGA cache live
+in the [processor repository](https://github.com/insper-riscv/Insper-RISC-V).
+This repository contains the extension, not a second copy of the processor.
+
+## Install on a workstation
+
+This version requires SDK **0.5.0**. The SDK integration is under review; use the
+matching reviewed SDK checkout rather than an older `main` or `live-vscode` tree.
+The SDK's `SDK.md` documents its pinned processor and Tools revisions.
+
+Prerequisites: Linux, VS Code with Microsoft Dev Containers, Docker access,
+and Quartus Standard/Lite with support for the board. The development image
+supplies GHDL and the RISC-V C toolchain. First setup needs internet access.
+
+Register the matching SDK once, on the computer that hosts Docker and the FPGA:
+
+```bash
+cd /path/to/Insper-RISC-V
+bash scripts/install-user.sh --quartus /path/to/altera/std25.1
+```
+
+Install [the bundled VSIX](install/rv32-development.vsix), either with
+**Extensions: Install from VSIX...** or:
+
+```bash
+code --install-extension /path/to/Live/install/rv32-development.vsix --force
+```
+
+Run **RV32: Create New C Project**, open the resulting folder, then run
+**RV32: Reopen Project in Dev Container**. The matching SDK bundles this extension
+and installs it into the container during setup. After an extension update,
+run **Developer: Reload Window**. If automatic installation cannot find the
+VS Code server, install the same VSIX from the connected container window.
+
+For Rust, use the SDK generator on the Docker host:
+
+```bash
+~/.local/bin/rv32-new rust /path/to/my-rust-app
+```
+
+The container bootstrap installs the Rust target and `rust-src`. The firmware is
+`no_std`; `core` is available. `String` and `Vec` require an allocator, which this
+release does not provide.
+
+## Connect over SSH
+
+Install Microsoft Remote - SSH on your laptop and connect to the lab computer.
+Create/open projects on that remote computer, register the SDK there, and install
+Live into the **SSH extension host** using **Install from VSIX...**. Run
+**Dev Containers: Reopen in Container** in that SSH window. Docker, Quartus and
+the USB-Blaster all remain on the lab computer; the laptop displays the editor.
+
+VPN/Tailscale connectivity and SSH access must already work. On shared machines,
+use your own SDK checkout and cache, and coordinate board ownership. If several
+connected boards match the target chip, set `project.jtag_hardware` to the exact
+cable name reported by **RV32: Check Environment**. An unrelated board is never
+selected as a fallback. Do not reset a shared JTAG service while another board
+is in use.
+
+## Use the three editor buttons
+
+Open a `.c` or `.rs` file in a folder containing `rv32.toml`:
+
+| Button | Action |
+|---|---|
+| Program FPGA | Synthesize on a cache miss, program the verified SOF, load and run the application |
+| Fast Update FPGA | Compile and load the application over JTAG without synthesizing or reprogramming |
+| Simulate | Compile and run in GHDL |
+
+Use Program FPGA after power-on or SDK/hardware updates. Use Fast Update for
+application changes after that. A completed program must return to the restart
+loop before another fast update. Application edits do not invalidate the SOF;
+hardware/runtime/build-flow edits do. Cache artifacts have SHA-256 checksums.
+
+The same commands appear in the Command Palette and **Terminal: Run Task**.
+Files are saved before a task starts. An active task blocks overlapping actions.
+
+Normal execution shows program stdout only, including programs with no output.
+Enable `rv32.debug` or **RV32: Toggle Debug Output** for compiler/tool diagnostics.
+Logs are retained under `logs/rv32/`. The SDK's internal-memory runtime reserves
+64 KiB for stdout; exceeding that reports failure instead of silently truncating.
+The terminal retains 100,000 lines. `project.simulation_timeout_cycles` defaults
+to 2,000,000; `project.timeout_seconds` controls the FPGA wait independently.
+
+## Multiple C sources and headers
+
+```toml
+[project]
+name = "my-app"
+language = "c"
+source = "src/main.c"
+sources = ["src/list.c", "src/utils.c"]
+include_dirs = ["include", "vendor/headers"]
+```
+
+Paths are relative to the project. List additional source files explicitly;
+headers are found through `include_dirs`. Generated `.rv32`, `build`, `logs`,
+`.vscode` and `.devcontainer` folders are hidden in the default Explorer view.
+Their presence on disk is normal. Do not delete the container configuration.
+
+## Upgrade an existing project
+
+Back up local settings, install the matching SDK/VSIX, and refresh the project's
+container configuration from the current SDK templates. Rebuild the container
+and reload the window. The cache directory is mounted as a writable parent to
+avoid the old `/home/ubuntu/.cache/uv` permission error. Older SDK bitstreams
+are incompatible with this release: run Program FPGA once before Fast Update.
+
+## Develop and package
+
+```bash
+npm ci
+npm test
+npm run package
+```
+
+The package is `dist/rv32-development-0.5.0.vsix`. The published installation
+copy is `install/rv32-development.vsix`; both must contain the same extension
+source/version. CI runs tests, packages the source and checks the bundled copy.
+The SDK has separate unit, real compiler/simulator and hardware checks; see its
+`SDK.md`. No marketplace publication is required for VSIX installation.

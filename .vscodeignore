@@ -1,0 +1,13 @@
+.github/**
+.gitignore
+docs/**
+test/**
+node_modules/**
+dist/**
+*.vsix
+
+integration/**
+
+install/**
+
+scripts/**

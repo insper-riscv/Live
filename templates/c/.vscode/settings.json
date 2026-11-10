@@ -1,0 +1,21 @@
+{
+  "C_Cpp.default.compilerPath": "/opt/riscv-foundation/riscv32-elf/bin/riscv32-unknown-elf-gcc",
+  "C_Cpp.default.cStandard": "c23",
+  "C_Cpp.default.includePath": [
+    "${workspaceFolder}/include",
+    "${workspaceFolder}/.rv32/include"
+  ],
+  "files.associations": {
+    "*.S": "asm"
+  },
+  "workbench.editor.editorActionsLocation": "default",
+  "workbench.editor.alwaysShowEditorActions": true,
+  "terminal.integrated.scrollback": 100000,
+  "files.exclude": {
+    "**/.devcontainer": true,
+    "**/.rv32": true,
+    "**/.vscode": true,
+    "**/build": true,
+    "**/logs": true
+  }
+}
