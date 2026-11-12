@@ -71,5 +71,13 @@ test('activation, active workspace, saving, task arguments and busy guard', asyn
   mock.tasks.taskExecutions=[];
   await commands.get('rv32.refreshDrivers')();
   assert.deepEqual(executed.at(-1).execution.args,['--debug','--project',root,'drivers']);
+  const nested = path.join(root, 'vendor', 'GPIO', 'example');
+  fs.mkdirSync(path.join(nested, 'src'), {recursive:true});
+  fs.writeFileSync(path.join(nested, 'rv32.toml'), '[project]');
+  mock.window.activeTextEditor.document.uri.fsPath = path.join(nested, 'src', 'main.c');
+  await commands.get('rv32.simulate')();
+  assert.deepEqual(executed.at(-1).execution.args, ['--debug', '--project', nested, 'simulate']);
+  assert.equal(executed.at(-1).execution.options.cwd, nested);
+  assert.equal(executed.at(-1).scope, folder);
   fs.rmSync(root,{recursive:true,force:true});
 });

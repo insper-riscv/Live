@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.0
+
+- Add Rust project creation and non-destructive Rust workspace initialization.
+- Ship complete Rust 2024 Dev Container templates matching SDK 0.8.0.
+- Run nested driver example files using their own nearest project manifest.
+- Document automatically generated standalone C driver example projects.
+
 ## 0.7.1
 
 - Include the shared readable C style in new project templates.

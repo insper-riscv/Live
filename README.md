@@ -136,7 +136,7 @@ The SDK reads the named YAML from `Core/profiles/`, applies the CPU switches to 
 
 ## Peripheral C drivers
 
-Use the matching SDK 0.7.1. New C templates enable `generate_drivers = true` under `[project]`. The SDK regenerates files in `vendor/` when preparing/building the project, using `platform` and `cpu_profile` from TOML. **RV32: Refresh Peripheral Drivers** also regenerates them explicitly. Sources and header paths are linked automatically.
+Use the matching SDK 0.8.0. New C templates enable `generate_drivers = true` under `[project]`. The SDK regenerates files in `vendor/` when preparing/building the project, using `platform` and `cpu_profile` from TOML. **RV32: Refresh Peripheral Drivers** also regenerates them explicitly. Sources and header paths are linked automatically.
 
 Only drivers for peripherals declared in the platform map are copied. The first reusable driver is GPIO (`vendor/GPIO`), including per-instance addresses, direction, set/clear/toggle, pin reads and IRQ read-and-clear. UART-only platforms receive address definitions and no invented GPIO. The SDK's `examples/gpio` uses the simulation-only modular platform to exercise two GPIO instances. Generated files are ownership-checked; hand edits and unrelated vendor files are preserved. See the matching SDK's `SDK.md`.
 
@@ -147,3 +147,19 @@ application-side register arithmetic. Driver availability follows the platform
 map and CPU elaboration requirements. New projects include `.clang-format`
 for readable multiline C code. See the SDK examples and driver headers for
 polling limits and register read/clear side effects.
+
+
+### Rust and standalone driver examples (0.8.0)
+
+Use **RV32: Create New Rust Project** from the command palette. It creates a full
+Rust 2024 bare-metal project with Cargo, tasks, editor settings and a Dev Container.
+**RV32: Add Rust Infrastructure to Current Folder** preserves existing files.
+Reopen the project in its container, then run Prepare Project and Simulate.
+
+The matching SDK makes `examples/gpio` and `examples/peripherals` complete projects.
+Prepare/Refresh Drivers also creates one C project at `vendor/<DRIVER>/example/`
+for every available driver. Each child has its own TOML/container/tasks, inherits
+the parent's hardware selection and disables recursive example generation. The
+run buttons use the active file's nearest TOML. Copy a generated project before
+editing it; managed-file protection applies. Opt out with
+`generate_driver_examples = false`. FLASH examples only read status.
