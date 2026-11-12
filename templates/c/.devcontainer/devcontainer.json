@@ -1,5 +1,5 @@
 {
-  "name": "RV32 C application",
+  "name": "RV32 external project",
   "dockerComposeFile": "compose.yaml",
   "service": "rv32-app",
   "workspaceFolder": "/workspace",
@@ -9,7 +9,8 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        "ms-vscode.cpptools"
+        "ms-vscode.cpptools",
+        "rust-lang.rust-analyzer"
       ]
     }
   },

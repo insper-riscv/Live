@@ -7,7 +7,7 @@ This repository contains the extension, not a second copy of the processor.
 
 ## Install on a workstation
 
-This version requires SDK **0.5.0**. The SDK integration is under review; use the
+This version requires SDK **0.6.0**. The SDK integration is under review; use the
 matching reviewed SDK checkout rather than an older `main` or `live-vscode` tree.
 The SDK's `SDK.md` documents its pinned processor and Tools revisions.
 
@@ -117,8 +117,19 @@ npm test
 npm run package
 ```
 
-The package is `dist/rv32-development-0.5.0.vsix`. The published installation
+The package is `dist/rv32-development-0.6.0.vsix`. The published installation
 copy is `install/rv32-development.vsix`; both must contain the same extension
 source/version. CI runs tests, packages the source and checks the bundled copy.
 The SDK has separate unit, real compiler/simulator and hardware checks; see its
 `SDK.md`. No marketplace publication is required for VSIX installation.
+
+## Select a CPU profile
+
+With the matching SDK from `sdk-profiles-drivers`, add this under `[project]` in `rv32.toml`:
+
+```toml
+platform = "internal-mem"
+cpu_profile = "rv32im_zicsr"
+```
+
+The SDK reads the named YAML from `Core/profiles/`, applies the CPU switches to private simulation/Quartus builds and compiles C for that ISA. `cpu_profile = "auto"` (or omission) preserves existing behavior. The platform selects the memory/peripheral map separately. Run **Program FPGA** after changing a profile, then **Fast Update FPGA** for C-only edits. The programming record tracks this SDK's last programming on that cable; after another tool programs the board, run Program FPGA again. Do not change generated `.rv32` files.

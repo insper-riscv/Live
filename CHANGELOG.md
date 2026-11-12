@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.0
+
+- Add CPU profile selection in project TOML through the matching SDK.
+- Pin the multilib development image and cap project containers at 8 GiB.
+- Require Program FPGA after a CPU-profile change before Fast Update.
+
 ## 0.5.0
 
 - Publish the extension and install guides in insper-riscv/Live.
