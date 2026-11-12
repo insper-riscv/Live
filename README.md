@@ -136,6 +136,14 @@ The SDK reads the named YAML from `Core/profiles/`, applies the CPU switches to 
 
 ## Peripheral C drivers
 
-Use the matching SDK 0.7.0. New C templates enable `generate_drivers = true` under `[project]`. The SDK regenerates files in `vendor/` when preparing/building the project, using `platform` and `cpu_profile` from TOML. **RV32: Refresh Peripheral Drivers** also regenerates them explicitly. Sources and header paths are linked automatically.
+Use the matching SDK 0.7.1. New C templates enable `generate_drivers = true` under `[project]`. The SDK regenerates files in `vendor/` when preparing/building the project, using `platform` and `cpu_profile` from TOML. **RV32: Refresh Peripheral Drivers** also regenerates them explicitly. Sources and header paths are linked automatically.
 
 Only drivers for peripherals declared in the platform map are copied. The first reusable driver is GPIO (`vendor/GPIO`), including per-instance addresses, direction, set/clear/toggle, pin reads and IRQ read-and-clear. UART-only platforms receive address definitions and no invented GPIO. The SDK's `examples/gpio` uses the simulation-only modular platform to exercise two GPIO instances. Generated files are ownership-checked; hand edits and unrelated vendor files are preserved. See the matching SDK's `SDK.md`.
+
+
+The matching SDK provides constructor-based C drivers for GPIO, TIMER, CLINT,
+PLIC, UART serial/JTAG, DISPLAY and FLASH_CTRL. Pin/digit/source indices replace
+application-side register arithmetic. Driver availability follows the platform
+map and CPU elaboration requirements. New projects include `.clang-format`
+for readable multiline C code. See the SDK examples and driver headers for
+polling limits and register read/clear side effects.

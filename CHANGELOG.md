@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.1
+
+- Include the shared readable C style in new project templates.
+- Document SDK 0.7.1 constructor-based drivers for all peripheral families.
+- Preserve existing commands, editor buttons and FPGA workflows.
+
 ## 0.7.0
 
 - Add automatic C peripheral driver generation through the matching SDK.
