@@ -68,5 +68,8 @@ test('activation, active workspace, saving, task arguments and busy guard', asyn
   mock.tasks.taskExecutions=[{task:executed[0]}];
   await commands.get('rv32.fpgaFull')();
   assert.equal(warned,1);assert.equal(executed.length,4);
+  mock.tasks.taskExecutions=[];
+  await commands.get('rv32.refreshDrivers')();
+  assert.deepEqual(executed.at(-1).execution.args,['--debug','--project',root,'drivers']);
   fs.rmSync(root,{recursive:true,force:true});
 });

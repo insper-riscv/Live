@@ -7,8 +7,8 @@ This repository contains the extension, not a second copy of the processor.
 
 ## Install on a workstation
 
-This version requires SDK **0.6.0**. The SDK integration is under review; use the
-matching reviewed SDK checkout rather than an older `main` or `live-vscode` tree.
+This version requires SDK **0.7.0**. The SDK integration is under review; use the
+[SDK feature checkout](https://github.com/insper-riscv/Insper-RISC-V/tree/sdk-profiles-drivers). The same SDK is integrated into the existing `live-vscode` PR branch; processor `main` is not changed.
 The SDK's `SDK.md` documents its pinned processor and Tools revisions.
 
 Prerequisites: Linux, VS Code with Microsoft Dev Containers, Docker access,
@@ -117,7 +117,7 @@ npm test
 npm run package
 ```
 
-The package is `dist/rv32-development-0.6.0.vsix`. The published installation
+The package is `dist/rv32-development-0.7.0.vsix`. The published installation
 copy is `install/rv32-development.vsix`; both must contain the same extension
 source/version. CI runs tests, packages the source and checks the bundled copy.
 The SDK has separate unit, real compiler/simulator and hardware checks; see its
@@ -133,3 +133,9 @@ cpu_profile = "rv32im_zicsr"
 ```
 
 The SDK reads the named YAML from `Core/profiles/`, applies the CPU switches to private simulation/Quartus builds and compiles C for that ISA. `cpu_profile = "auto"` (or omission) preserves existing behavior. The platform selects the memory/peripheral map separately. Run **Program FPGA** after changing a profile, then **Fast Update FPGA** for C-only edits. The programming record tracks this SDK's last programming on that cable; after another tool programs the board, run Program FPGA again. Do not change generated `.rv32` files.
+
+## Peripheral C drivers
+
+Use the matching SDK 0.7.0. New C templates enable `generate_drivers = true` under `[project]`. The SDK regenerates files in `vendor/` when preparing/building the project, using `platform` and `cpu_profile` from TOML. **RV32: Refresh Peripheral Drivers** also regenerates them explicitly. Sources and header paths are linked automatically.
+
+Only drivers for peripherals declared in the platform map are copied. The first reusable driver is GPIO (`vendor/GPIO`), including per-instance addresses, direction, set/clear/toggle, pin reads and IRQ read-and-clear. UART-only platforms receive address definitions and no invented GPIO. The SDK's `examples/gpio` uses the simulation-only modular platform to exercise two GPIO instances. Generated files are ownership-checked; hand edits and unrelated vendor files are preserved. See the matching SDK's `SDK.md`.

@@ -2,7 +2,7 @@
   "name": "rv32-development",
   "displayName": "Insper RISC-V Live",
   "description": "Create, simulate, and program C and Rust applications for the Insper RV32 processor.",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "publisher": "insper-riscv",
   "license": "Apache-2.0",
   "repository": {
@@ -52,7 +52,8 @@
     "onTaskType:rv32",
     "workspaceContains:rv32.toml",
     "onLanguage:c",
-    "onLanguage:rust"
+    "onLanguage:rust",
+    "onCommand:rv32.refreshDrivers"
   ],
   "extensionPack": [
     "ms-vscode.cpptools",
@@ -110,6 +111,10 @@
       {
         "command": "rv32.toggleDebugOutput",
         "title": "RV32: Toggle Debug Output"
+      },
+      {
+        "command": "rv32.refreshDrivers",
+        "title": "RV32: Refresh Peripheral Drivers"
       }
     ],
     "configuration": {
@@ -150,7 +155,8 @@
               "fpga-full",
               "fpga-fast",
               "fpga-reuse",
-              "stdout"
+              "stdout",
+              "drivers"
             ]
           }
         }
@@ -179,7 +185,7 @@
   "scripts": {
     "check": "node --check extension.js && node --check src/core.js",
     "test": "npm run check && node --test",
-    "package": "node -e \"require('fs').mkdirSync('dist',{recursive:true})\" && vsce package --no-dependencies --follow-symlinks --out dist/rv32-development-0.6.0.vsix"
+    "package": "node -e \"require('fs').mkdirSync('dist',{recursive:true})\" && vsce package --no-dependencies --follow-symlinks --out dist/rv32-development-0.7.0.vsix"
   },
   "devDependencies": {
     "@vscode/vsce": "4.0.0"

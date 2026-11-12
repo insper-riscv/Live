@@ -69,7 +69,8 @@ test("extension manifest exposes all expected RV32 actions", () => {
     "rv32.simulate",
     "rv32.fpgaFull",
     "rv32.fpgaFast",
-    "rv32.readStdout"
+    "rv32.readStdout",
+    "rv32.refreshDrivers"
   ]) {
     assert.equal(commands.has(command), true, `missing ${command}`);
   }

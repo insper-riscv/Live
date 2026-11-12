@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.0
+
+- Add automatic C peripheral driver generation through the matching SDK.
+- Add Refresh Peripheral Drivers command and visible vendor headers.
+- Preserve the three editor buttons and quiet program output.
+
 ## 0.6.0
 
 - Add CPU profile selection in project TOML through the matching SDK.

@@ -7,6 +7,7 @@ const core = require("./src/core");
 
 const ACTIONS = Object.freeze({
   prepare: { label: "RV32: Prepare Project", args: ["setup"] },
+  drivers: { label: "RV32: Refresh Peripheral Drivers", args: ["drivers"] },
   doctor: { label: "RV32: Check Environment", args: ["doctor"] },
   simulate: { label: "RV32: Simulate", args: ["simulate"], matcher: ["$gcc"] },
   "fpga-full": {
@@ -239,6 +240,7 @@ function activate(context) {
 
   registerAction(context, "rv32.prepare", "prepare");
   registerAction(context, "rv32.doctor", "doctor");
+  registerAction(context, "rv32.refreshDrivers", "drivers");
   registerAction(context, "rv32.simulate", "simulate");
   registerAction(context, "rv32.fpgaFull", "fpga-full");
   registerAction(context, "rv32.fpgaFast", "fpga-fast");
