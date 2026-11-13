@@ -7,8 +7,8 @@ This repository contains the extension, not a second copy of the processor.
 
 ## Install on a workstation
 
-This version requires SDK **0.5.0**. The SDK integration is under review; use the
-matching reviewed SDK checkout rather than an older `main` or `live-vscode` tree.
+This version requires SDK **0.7.0**. The SDK integration is under review; use the
+[SDK feature checkout](https://github.com/insper-riscv/Insper-RISC-V/tree/sdk-profiles-drivers). The same SDK is integrated into the existing `live-vscode` PR branch; processor `main` is not changed.
 The SDK's `SDK.md` documents its pinned processor and Tools revisions.
 
 Prerequisites: Linux, VS Code with Microsoft Dev Containers, Docker access,
@@ -117,8 +117,81 @@ npm test
 npm run package
 ```
 
-The package is `dist/rv32-development-0.5.0.vsix`. The published installation
+The package is `dist/rv32-development-0.9.1.vsix`. The published installation
 copy is `install/rv32-development.vsix`; both must contain the same extension
 source/version. CI runs tests, packages the source and checks the bundled copy.
 The SDK has separate unit, real compiler/simulator and hardware checks; see its
 `SDK.md`. No marketplace publication is required for VSIX installation.
+
+## Select a CPU profile
+
+With the matching SDK from `sdk-profiles-drivers`, add this under `[project]` in `rv32.toml`:
+
+```toml
+platform = "internal-mem"
+cpu_profile = "rv32im_zicsr"
+```
+
+The SDK reads the named YAML from `Core/profiles/`, applies the CPU switches to private simulation/Quartus builds and compiles C for that ISA. `cpu_profile = "auto"` (or omission) preserves existing behavior. The platform selects the memory/peripheral map separately. Run **Program FPGA** after changing a profile, then **Fast Update FPGA** for C-only edits. The programming record tracks this SDK's last programming on that cable; after another tool programs the board, run Program FPGA again. Do not change generated `.rv32` files.
+
+## Peripheral C drivers
+
+Use the matching SDK 0.9.0. New C templates enable `generate_drivers = true` under `[project]`. The SDK regenerates files in `vendor/` when preparing/building the project, using `platform` and `cpu_profile` from TOML. **RV32: Refresh Peripheral Drivers** also regenerates them explicitly. Sources and header paths are linked automatically.
+
+Only drivers for peripherals declared in the platform map are copied. The first reusable driver is GPIO (`vendor/GPIO`), including per-instance addresses, direction, set/clear/toggle, pin reads and IRQ read-and-clear. UART-only platforms receive address definitions and no invented GPIO. The SDK's `examples/gpio` uses the simulation-only modular platform to exercise two GPIO instances. Generated files are ownership-checked; hand edits and unrelated vendor files are preserved. See the matching SDK's `SDK.md`.
+
+
+The matching SDK provides constructor-based C drivers for GPIO, TIMER, CLINT,
+PLIC, UART serial/JTAG, DISPLAY and FLASH_CTRL. Pin/digit/source indices replace
+application-side register arithmetic. Driver availability follows the platform
+map and CPU elaboration requirements. New projects include `.clang-format`
+for readable multiline C code. See the SDK examples and driver headers for
+polling limits and register read/clear side effects.
+
+
+### Rust and standalone driver examples (0.8.0)
+
+Use **RV32: Create New Rust Project** from the command palette. It creates a full
+Rust 2024 bare-metal project with Cargo, tasks, editor settings and a Dev Container.
+**RV32: Add Rust Infrastructure to Current Folder** preserves existing files.
+Reopen the project in its container, then run Prepare Project and Simulate.
+
+The matching SDK makes `examples/gpio` and `examples/peripherals` complete projects.
+Prepare/Refresh Drivers also creates one C project at `vendor/<DRIVER>/example/`
+for every available driver. Each child has its own TOML/container/tasks, inherits
+the parent's hardware selection and disables recursive example generation. The
+run buttons use the active file's nearest TOML. Copy a generated project before
+editing it; managed-file protection applies. Opt out with
+`generate_driver_examples = false`. FLASH examples only read status.
+
+
+### Rust runtime and generated drivers (0.9.0)
+
+New Rust projects enable generation. Prepare creates vendor/rv32-runtime plus
+safe Rust/sys crates for every peripheral enabled by the selected platform and
+CPU profile, and adds Cargo path dependencies. Addresses, widths, UART backend
+and queue capacity are supplied by generated C platform headers. Application
+constructors do not accept addresses.
+
+The runtime supplies a malloc/free-backed global allocator, Vec/String/Box via
+its prelude, print!/println!, a normal Rust main connected by entry!(main), and a
+panic handler that prints once and loops. It remains no_std. The driver APIs
+have compiling documentation examples. Driver example projects use Rust when
+the parent uses Rust. See SDK examples/peripherals/rust for the complete project.
+Existing Rust source/panic handlers are preserved; adopting the runtime is
+explicit when updating an existing project. Do not define a second global
+allocator/panic handler; disable the respective runtime features if replacing it.
+
+
+### Remote toolbar and Rust prerequisites (0.9.1)
+
+Install matching SDK/extension 0.9.1. RV32 runs in the workspace extension host,
+so Dev Container/SSH projects resolve their actual remote files. The Simulate,
+Fast Update FPGA and Program FPGA editor buttons support both C and Rust files.
+The editor toolbar must be visible in VS Code settings.
+
+The container starts as root only to install missing Rust Clang/libclang packages,
+then keeps running while VS Code uses ubuntu. This does not require sudo or a
+Dockerfile build. Rust setup/build checks these prerequisites before Cargo.
+Existing containers need their matching infrastructure refreshed/rebuilt once;
+upgrading the extension requires Developer: Reload Window.

@@ -1,12 +1,12 @@
 "use strict";
 
-const fs = require("node:fs");
 const path = require("node:path");
 const vscode = require("vscode");
 const core = require("./src/core");
 
 const ACTIONS = Object.freeze({
   prepare: { label: "RV32: Prepare Project", args: ["setup"] },
+  drivers: { label: "RV32: Refresh Peripheral Drivers", args: ["drivers"] },
   doctor: { label: "RV32: Check Environment", args: ["doctor"] },
   simulate: { label: "RV32: Simulate", args: ["simulate"], matcher: ["$gcc"] },
   "fpga-full": {
@@ -60,15 +60,16 @@ async function requireSdkPath() {
   return undefined;
 }
 
-function buildTask(folder, sdk, actionName) {
+function buildTask(folder, sdk, actionName, projectRoot) {
   const action = ACTIONS[actionName];
   if (!action) return undefined;
+  projectRoot ||= core.projectDirectory(vscode.window.activeTextEditor?.document.uri.fsPath, folder.uri.fsPath) || folder.uri.fsPath;
   const debug = vscode.workspace.getConfiguration("rv32", folder.uri).get("debug", false);
   const executable = path.join(sdk, "scripts", "rv32-project");
   const execution = new vscode.ProcessExecution(
     executable,
-    [...(debug ? ["--debug"] : []), "--project", folder.uri.fsPath, ...action.args],
-    { cwd: folder.uri.fsPath }
+    [...(debug ? ["--debug"] : []), "--project", projectRoot, ...action.args],
+    { cwd: projectRoot }
   );
   const task = new vscode.Task(
     { type: "rv32", action: actionName },
@@ -102,7 +103,9 @@ async function runAction(actionName, uri) {
     await vscode.window.showWarningMessage("An RV32 task is already running. Wait for it or stop it first.");
     return;
   }
-  await vscode.tasks.executeTask(buildTask(folder, sdk, actionName));
+  const resource = uri || vscode.window.activeTextEditor?.document.uri;
+  const projectRoot = core.projectDirectory(resource?.fsPath, folder.uri.fsPath);
+  await vscode.tasks.executeTask(buildTask(folder, sdk, actionName, projectRoot));
 }
 
 class Rv32TaskProvider {
@@ -142,18 +145,18 @@ async function selectSdk() {
   await vscode.window.showInformationMessage(`RV32 SDK configured: ${candidate}`);
 }
 
-async function createCProject(context) {
+async function createProject(context, language) {
   const parent = await vscode.window.showOpenDialog({
     canSelectFiles: false,
     canSelectFolders: true,
     canSelectMany: false,
-    title: "Choose the parent folder for the new RV32 C project"
+    title: `Choose the parent folder for the new RV32 ${language === "rust" ? "Rust" : "C"} project`
   });
   if (!parent?.length) return;
 
   const name = await vscode.window.showInputBox({
     prompt: "Project directory name",
-    value: "rv32-c-app",
+    value: `rv32-${language}-app`,
     validateInput: (value) =>
       core.validProjectName(value) ? undefined : "Use letters, numbers, dot, dash, or underscore."
   });
@@ -164,26 +167,26 @@ async function createCProject(context) {
     await vscode.window.showErrorMessage(`Destination is not empty: ${destination}`);
     return;
   }
-  core.copyTree(path.join(context.extensionPath, "templates", "c"), destination);
+  core.copyTree(path.join(context.extensionPath, "templates", language), destination);
 
   const openNewWindow = vscode.workspace
     .getConfiguration("rv32")
     .get("openCreatedProjectInNewWindow", true);
   await vscode.commands.executeCommand(
     "vscode.openFolder",
-    vscode.Uri.file(destination),
+    vscode.Uri.joinPath(parent[0], name),
     openNewWindow
   );
 }
 
-async function initializeCurrentWorkspace(context) {
+async function initializeCurrentWorkspace(context, language) {
   const folder = firstWorkspaceFolder();
   if (!folder) {
     await vscode.window.showErrorMessage("Open the destination folder first.");
     return;
   }
   const result = core.copyTree(
-    path.join(context.extensionPath, "templates", "c"),
+    path.join(context.extensionPath, "templates", language),
     folder.uri.fsPath,
     { overwrite: false }
   );
@@ -205,7 +208,7 @@ function activate(context) {
   const updateContext = () => {
     const folder = firstWorkspaceFolder();
     return vscode.commands.executeCommand("setContext", "rv32.project",
-      Boolean(folder && fs.existsSync(path.join(folder.uri.fsPath, "rv32.toml"))));
+      Boolean(folder && core.projectDirectory(vscode.window.activeTextEditor?.document.uri.fsPath, folder.uri.fsPath)));
   };
   updateContext();
   const watcher = vscode.workspace.createFileSystemWatcher("**/rv32.toml");
@@ -222,9 +225,13 @@ function activate(context) {
       await config.update("debug", enabled, folder ? vscode.ConfigurationTarget.Workspace : vscode.ConfigurationTarget.Global);
       void vscode.window.showInformationMessage(`RV32 Debug Output: ${enabled ? "On" : "Off"}`);
     }),
-    vscode.commands.registerCommand("rv32.createCProject", () => createCProject(context)),
+    vscode.commands.registerCommand("rv32.createCProject", () => createProject(context, "c")),
+    vscode.commands.registerCommand("rv32.createRustProject", () => createProject(context, "rust")),
     vscode.commands.registerCommand("rv32.initializeCWorkspace", () =>
-      initializeCurrentWorkspace(context)
+      initializeCurrentWorkspace(context, "c")
+    ),
+    vscode.commands.registerCommand("rv32.initializeRustWorkspace", () =>
+      initializeCurrentWorkspace(context, "rust")
     ),
     vscode.commands.registerCommand("rv32.reopenInContainer", async () => {
       try {
@@ -239,6 +246,7 @@ function activate(context) {
 
   registerAction(context, "rv32.prepare", "prepare");
   registerAction(context, "rv32.doctor", "doctor");
+  registerAction(context, "rv32.refreshDrivers", "drivers");
   registerAction(context, "rv32.simulate", "simulate");
   registerAction(context, "rv32.fpgaFull", "fpga-full");
   registerAction(context, "rv32.fpgaFast", "fpga-fast");

@@ -5,25 +5,13 @@
       "label": "RV32: Check environment",
       "type": "shell",
       "command": "\"$RV32_SDK_ROOT/scripts/rv32-project\" --project \"$PWD\" doctor",
-      "problemMatcher": [],
-      "presentation": {
-        "echo": false,
-        "showReuseMessage": false,
-        "reveal": "always",
-        "clear": true
-      }
+      "problemMatcher": []
     },
     {
       "label": "RV32: Prepare project",
       "type": "shell",
       "command": "\"$RV32_SDK_ROOT/scripts/rv32-project\" --project \"$PWD\" setup",
-      "problemMatcher": [],
-      "presentation": {
-        "echo": false,
-        "showReuseMessage": false,
-        "reveal": "always",
-        "clear": true
-      }
+      "problemMatcher": []
     },
     {
       "label": "RV32: Simulate",
@@ -35,13 +23,7 @@
       },
       "problemMatcher": [
         "$gcc"
-      ],
-      "presentation": {
-        "echo": false,
-        "showReuseMessage": false,
-        "reveal": "always",
-        "clear": true
-      }
+      ]
     },
     {
       "label": "RV32: FPGA full configuration",
@@ -49,13 +31,7 @@
       "command": "\"$RV32_SDK_ROOT/scripts/rv32-project\" --project \"$PWD\" fpga --mode full",
       "problemMatcher": [
         "$gcc"
-      ],
-      "presentation": {
-        "echo": false,
-        "showReuseMessage": false,
-        "reveal": "always",
-        "clear": true
-      }
+      ]
     },
     {
       "label": "RV32: FPGA fast update",
@@ -67,13 +43,7 @@
       },
       "problemMatcher": [
         "$gcc"
-      ],
-      "presentation": {
-        "echo": false,
-        "showReuseMessage": false,
-        "reveal": "always",
-        "clear": true
-      }
+      ]
     },
     {
       "label": "RV32: FPGA reuse existing SOF",
@@ -81,25 +51,19 @@
       "command": "\"$RV32_SDK_ROOT/scripts/rv32-project\" --project \"$PWD\" fpga --mode reprogram",
       "problemMatcher": [
         "$gcc"
-      ],
-      "presentation": {
-        "echo": false,
-        "showReuseMessage": false,
-        "reveal": "always",
-        "clear": true
-      }
+      ]
     },
     {
       "label": "RV32: Read FPGA stdout",
       "type": "shell",
       "command": "\"$RV32_SDK_ROOT/scripts/rv32-project\" --project \"$PWD\" stdout",
-      "problemMatcher": [],
-      "presentation": {
-        "echo": false,
-        "showReuseMessage": false,
-        "reveal": "always",
-        "clear": true
-      }
+      "problemMatcher": []
+    },
+    {
+      "label": "RV32: Refresh Peripheral Drivers",
+      "type": "shell",
+      "command": "\"$RV32_SDK_ROOT/scripts/rv32-project\" --project \"$PWD\" drivers",
+      "problemMatcher": []
     }
   ]
 }

@@ -1,5 +1,43 @@
 # Changelog
 
+## 0.9.1
+
+- Keep RV32 commands and editor buttons in the workspace extension host for C/Rust remote projects.
+- Install Clang/libclang at container root startup; normal project commands remain ubuntu.
+- Check Rust binding prerequisites before Cargo, including existing containers.
+
+## 0.9.0
+
+- Generate no_std Rust runtime and profile-selected C-backed Rust drivers through SDK 0.9.0.
+- Add malloc/free allocation, Vec/String/Box, formatting and ordinary Rust main support.
+- Provide compiling driver API examples and independent Rust driver projects.
+- Preserve existing application source and custom Cargo dependencies.
+
+## 0.8.0
+
+- Add Rust project creation and non-destructive Rust workspace initialization.
+- Ship complete Rust 2024 Dev Container templates matching SDK 0.8.0.
+- Run nested driver example files using their own nearest project manifest.
+- Document automatically generated standalone C driver example projects.
+
+## 0.7.1
+
+- Include the shared readable C style in new project templates.
+- Document SDK 0.7.1 constructor-based drivers for all peripheral families.
+- Preserve existing commands, editor buttons and FPGA workflows.
+
+## 0.7.0
+
+- Add automatic C peripheral driver generation through the matching SDK.
+- Add Refresh Peripheral Drivers command and visible vendor headers.
+- Preserve the three editor buttons and quiet program output.
+
+## 0.6.0
+
+- Add CPU profile selection in project TOML through the matching SDK.
+- Pin the multilib development image and cap project containers at 8 GiB.
+- Require Program FPGA after a CPU-profile change before Fast Update.
+
 ## 0.5.0
 
 - Publish the extension and install guides in insper-riscv/Live.

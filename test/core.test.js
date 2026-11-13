@@ -64,12 +64,15 @@ test("extension manifest exposes all expected RV32 actions", () => {
   const commands = new Set(manifest.contributes.commands.map((entry) => entry.command));
   for (const command of [
     "rv32.createCProject",
+    "rv32.createRustProject",
+    "rv32.initializeRustWorkspace",
     "rv32.initializeCWorkspace",
     "rv32.prepare",
     "rv32.simulate",
     "rv32.fpgaFull",
     "rv32.fpgaFast",
-    "rv32.readStdout"
+    "rv32.readStdout",
+    "rv32.refreshDrivers"
   ]) {
     assert.equal(commands.has(command), true, `missing ${command}`);
   }
@@ -103,4 +106,22 @@ test("project template keeps editor toolbar visible despite a hidden user toolba
   const container = require("../templates/c/.devcontainer/devcontainer.json");
   assert.ok(container.postCreateCommand.includes("bootstrap-external.sh"));
   assert.ok(container.postAttachCommand.includes("install-vscode-extension.sh"));
+  for (const language of ["c", "rust"]) {
+    const compose = fs.readFileSync(path.join(__dirname, `../templates/${language}/.devcontainer/compose.yaml`), "utf8");
+    assert.match(compose, /user: root/);
+    assert.match(compose, /container-start\.sh/);
+    assert.doesNotMatch(compose, /command: sleep infinity/);
+  }
+});
+
+
+test("nested driver examples resolve to their own project inside the workspace", () => {
+  const root = temporaryDirectory();
+  const example = path.join(root, "vendor", "GPIO", "example");
+  fs.mkdirSync(path.join(example, "src"), { recursive: true });
+  fs.writeFileSync(path.join(root, "rv32.toml"), "[project]");
+  fs.writeFileSync(path.join(example, "rv32.toml"), "[project]");
+  assert.equal(core.projectDirectory(path.join(example, "src/main.c"), root), example);
+  assert.equal(core.projectDirectory(path.join(root, "src/main.c"), root), root);
+  assert.equal(core.projectDirectory("/outside/main.c", root), root);
 });

@@ -59,6 +59,20 @@ function copyTree(source, destination, options = {}) {
   return { copied, skipped };
 }
 
+function projectDirectory(resource, workspaceRoot) {
+  const root = path.resolve(workspaceRoot);
+  let directory = resource ? path.dirname(path.resolve(resource)) : root;
+  const relative = path.relative(root, directory);
+  if (relative === ".." || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) {
+    directory = root;
+  }
+  while (true) {
+    if (fs.existsSync(path.join(directory, "rv32.toml"))) return directory;
+    if (directory === root) return undefined;
+    directory = path.dirname(directory);
+  }
+}
+
 function validProjectName(value) {
   return /^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(value || "");
 }
@@ -68,6 +82,7 @@ module.exports = {
   directoryIsEmpty,
   expandHome,
   isSdkDirectory,
+  projectDirectory,
   resolveLocalSdkPath,
   validProjectName
 };

@@ -2,7 +2,7 @@
   "name": "rv32-development",
   "displayName": "Insper RISC-V Live",
   "description": "Create, simulate, and program C and Rust applications for the Insper RV32 processor.",
-  "version": "0.5.0",
+  "version": "0.9.1",
   "publisher": "insper-riscv",
   "license": "Apache-2.0",
   "repository": {
@@ -24,8 +24,7 @@
     "insper"
   ],
   "extensionKind": [
-    "workspace",
-    "ui"
+    "workspace"
   ],
   "capabilities": {
     "virtualWorkspaces": {
@@ -52,17 +51,29 @@
     "onTaskType:rv32",
     "workspaceContains:rv32.toml",
     "onLanguage:c",
-    "onLanguage:rust"
+    "onLanguage:rust",
+    "onCommand:rv32.refreshDrivers",
+    "onCommand:rv32.createRustProject",
+    "onCommand:rv32.initializeRustWorkspace"
   ],
   "extensionPack": [
     "ms-vscode.cpptools",
-    "ms-vscode-remote.remote-containers"
+    "ms-vscode-remote.remote-containers",
+    "rust-lang.rust-analyzer"
   ],
   "contributes": {
     "commands": [
       {
         "command": "rv32.createCProject",
         "title": "RV32: Create New C Project"
+      },
+      {
+        "command": "rv32.createRustProject",
+        "title": "RV32: Create New Rust Project"
+      },
+      {
+        "command": "rv32.initializeRustWorkspace",
+        "title": "RV32: Add Rust Infrastructure to Current Folder"
       },
       {
         "command": "rv32.initializeCWorkspace",
@@ -110,6 +121,10 @@
       {
         "command": "rv32.toggleDebugOutput",
         "title": "RV32: Toggle Debug Output"
+      },
+      {
+        "command": "rv32.refreshDrivers",
+        "title": "RV32: Refresh Peripheral Drivers"
       }
     ],
     "configuration": {
@@ -150,7 +165,8 @@
               "fpga-full",
               "fpga-fast",
               "fpga-reuse",
-              "stdout"
+              "stdout",
+              "drivers"
             ]
           }
         }
@@ -179,7 +195,7 @@
   "scripts": {
     "check": "node --check extension.js && node --check src/core.js",
     "test": "npm run check && node --test",
-    "package": "node -e \"require('fs').mkdirSync('dist',{recursive:true})\" && vsce package --no-dependencies --follow-symlinks --out dist/rv32-development-0.5.0.vsix"
+    "package": "node -e \"require('fs').mkdirSync('dist',{recursive:true})\" && vsce package --no-dependencies --follow-symlinks --out dist/rv32-development-0.9.1.vsix"
   },
   "devDependencies": {
     "@vscode/vsce": "4.0.0"
