@@ -60,6 +60,13 @@ test("Rust creation opens a complete project and initialization preserves user c
     }
     assert.match(fs.readFileSync(path.join(project, "rv32.toml"), "utf8"), /language = "rust"/);
     assert.equal(fs.existsSync(path.join(project, "src/main.c")), false);
+    assert.match(fs.readFileSync(path.join(project, "rv32.toml"), "utf8"), /generate_drivers = true/);
+    assert.match(fs.readFileSync(path.join(project, "Cargo.toml"), "utf8"), /rv32-runtime/);
+    const main = fs.readFileSync(path.join(project, "src/main.rs"), "utf8");
+    assert.match(main, /entry!\(main\)/);
+    assert.match(main, /fn main\(\)/);
+    assert.match(main, /String::from/);
+    assert.match(main, /vec!\[/);
     assert.equal(opened[0][0].fsPath, project);
     assert.equal(opened[0][0].scheme, "vscode-remote");
     assert.equal(opened[0][0].authority, "ssh-remote+lab");

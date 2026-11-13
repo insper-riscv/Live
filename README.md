@@ -117,7 +117,7 @@ npm test
 npm run package
 ```
 
-The package is `dist/rv32-development-0.7.0.vsix`. The published installation
+The package is `dist/rv32-development-0.9.0.vsix`. The published installation
 copy is `install/rv32-development.vsix`; both must contain the same extension
 source/version. CI runs tests, packages the source and checks the bundled copy.
 The SDK has separate unit, real compiler/simulator and hardware checks; see its
@@ -136,7 +136,7 @@ The SDK reads the named YAML from `Core/profiles/`, applies the CPU switches to 
 
 ## Peripheral C drivers
 
-Use the matching SDK 0.8.0. New C templates enable `generate_drivers = true` under `[project]`. The SDK regenerates files in `vendor/` when preparing/building the project, using `platform` and `cpu_profile` from TOML. **RV32: Refresh Peripheral Drivers** also regenerates them explicitly. Sources and header paths are linked automatically.
+Use the matching SDK 0.9.0. New C templates enable `generate_drivers = true` under `[project]`. The SDK regenerates files in `vendor/` when preparing/building the project, using `platform` and `cpu_profile` from TOML. **RV32: Refresh Peripheral Drivers** also regenerates them explicitly. Sources and header paths are linked automatically.
 
 Only drivers for peripherals declared in the platform map are copied. The first reusable driver is GPIO (`vendor/GPIO`), including per-instance addresses, direction, set/clear/toggle, pin reads and IRQ read-and-clear. UART-only platforms receive address definitions and no invented GPIO. The SDK's `examples/gpio` uses the simulation-only modular platform to exercise two GPIO instances. Generated files are ownership-checked; hand edits and unrelated vendor files are preserved. See the matching SDK's `SDK.md`.
 
@@ -163,3 +163,21 @@ the parent's hardware selection and disables recursive example generation. The
 run buttons use the active file's nearest TOML. Copy a generated project before
 editing it; managed-file protection applies. Opt out with
 `generate_driver_examples = false`. FLASH examples only read status.
+
+
+### Rust runtime and generated drivers (0.9.0)
+
+New Rust projects enable generation. Prepare creates vendor/rv32-runtime plus
+safe Rust/sys crates for every peripheral enabled by the selected platform and
+CPU profile, and adds Cargo path dependencies. Addresses, widths, UART backend
+and queue capacity are supplied by generated C platform headers. Application
+constructors do not accept addresses.
+
+The runtime supplies a malloc/free-backed global allocator, Vec/String/Box via
+its prelude, print!/println!, a normal Rust main connected by entry!(main), and a
+panic handler that prints once and loops. It remains no_std. The driver APIs
+have compiling documentation examples. Driver example projects use Rust when
+the parent uses Rust. See SDK examples/peripherals/rust for the complete project.
+Existing Rust source/panic handlers are preserved; adopting the runtime is
+explicit when updating an existing project. Do not define a second global
+allocator/panic handler; disable the respective runtime features if replacing it.

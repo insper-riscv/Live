@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.0
+
+- Generate no_std Rust runtime and profile-selected C-backed Rust drivers through SDK 0.9.0.
+- Add malloc/free allocation, Vec/String/Box, formatting and ordinary Rust main support.
+- Provide compiling driver API examples and independent Rust driver projects.
+- Preserve existing application source and custom Cargo dependencies.
+
 ## 0.8.0
 
 - Add Rust project creation and non-destructive Rust workspace initialization.
