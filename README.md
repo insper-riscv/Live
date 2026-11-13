@@ -117,7 +117,7 @@ npm test
 npm run package
 ```
 
-The package is `dist/rv32-development-0.9.0.vsix`. The published installation
+The package is `dist/rv32-development-0.9.1.vsix`. The published installation
 copy is `install/rv32-development.vsix`; both must contain the same extension
 source/version. CI runs tests, packages the source and checks the bundled copy.
 The SDK has separate unit, real compiler/simulator and hardware checks; see its
@@ -181,3 +181,17 @@ the parent uses Rust. See SDK examples/peripherals/rust for the complete project
 Existing Rust source/panic handlers are preserved; adopting the runtime is
 explicit when updating an existing project. Do not define a second global
 allocator/panic handler; disable the respective runtime features if replacing it.
+
+
+### Remote toolbar and Rust prerequisites (0.9.1)
+
+Install matching SDK/extension 0.9.1. RV32 runs in the workspace extension host,
+so Dev Container/SSH projects resolve their actual remote files. The Simulate,
+Fast Update FPGA and Program FPGA editor buttons support both C and Rust files.
+The editor toolbar must be visible in VS Code settings.
+
+The container starts as root only to install missing Rust Clang/libclang packages,
+then keeps running while VS Code uses ubuntu. This does not require sudo or a
+Dockerfile build. Rust setup/build checks these prerequisites before Cargo.
+Existing containers need their matching infrastructure refreshed/rebuilt once;
+upgrading the extension requires Developer: Reload Window.

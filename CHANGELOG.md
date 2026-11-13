@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.1
+
+- Keep RV32 commands and editor buttons in the workspace extension host for C/Rust remote projects.
+- Install Clang/libclang at container root startup; normal project commands remain ubuntu.
+- Check Rust binding prerequisites before Cargo, including existing containers.
+
 ## 0.9.0
 
 - Generate no_std Rust runtime and profile-selected C-backed Rust drivers through SDK 0.9.0.

@@ -106,6 +106,12 @@ test("project template keeps editor toolbar visible despite a hidden user toolba
   const container = require("../templates/c/.devcontainer/devcontainer.json");
   assert.ok(container.postCreateCommand.includes("bootstrap-external.sh"));
   assert.ok(container.postAttachCommand.includes("install-vscode-extension.sh"));
+  for (const language of ["c", "rust"]) {
+    const compose = fs.readFileSync(path.join(__dirname, `../templates/${language}/.devcontainer/compose.yaml`), "utf8");
+    assert.match(compose, /user: root/);
+    assert.match(compose, /container-start\.sh/);
+    assert.doesNotMatch(compose, /command: sleep infinity/);
+  }
 });
 
 

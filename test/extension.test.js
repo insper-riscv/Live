@@ -10,6 +10,7 @@ test('editor buttons support C and Rust RV32 projects', () => {
   const m = require('../package.json');
   const buttons = m.contributes.menus['editor/title'];
   assert.equal(buttons.length, 3);
+  assert.deepEqual(m.extensionKind, ["workspace"]);
   assert.ok(m.activationEvents.includes("onLanguage:c"));
   assert.ok(m.activationEvents.includes("onLanguage:rust"));
   for (const button of buttons) {
@@ -24,7 +25,7 @@ test('activation, active workspace, saving, task arguments and busy guard', asyn
   fs.writeFileSync(path.join(sdk, 'scripts/rv32-project'), '');
   const folder = {uri:{fsPath:root}};
   fs.writeFileSync(path.join(root, 'rv32.toml'), '[project]');
-  const commands = new Map(); const executed = []; let saved = 0; let warned = 0; let debug = false;
+  const commands = new Map(); const executed = []; let saved = 0; let warned = 0; let debug = false; let editorChanged; const contexts = [];
   const event = () => ({dispose(){}});
   const mock = {
     env:{remoteName:'ssh-remote'},
@@ -35,8 +36,8 @@ test('activation, active workspace, saving, task arguments and busy guard', asyn
       createFileSystemWatcher:()=>({dispose(){},onDidCreate:event,onDidDelete:event}),
       onDidChangeWorkspaceFolders:event},
     window:{activeTextEditor:{document:{uri:{fsPath:path.join(root,'main.c')}}},
-      onDidChangeActiveTextEditor:event, showWarningMessage:async()=>{warned++;}},
-    commands:{registerCommand:(name,fn)=>{commands.set(name,fn);return event();},executeCommand:async()=>{}},
+      onDidChangeActiveTextEditor:callback=>{editorChanged=callback;return event();}, showWarningMessage:async()=>{warned++;}},
+    commands:{registerCommand:(name,fn)=>{commands.set(name,fn);return event();},executeCommand:async(name,...args)=>{if(name === "setContext") contexts.push(args);}},
     tasks:{taskExecutions:[],registerTaskProvider:()=>event(),executeTask:async t=>executed.push(t)},
     ProcessExecution:class {constructor(executable,args,options){Object.assign(this,{executable,args,options});}},
     Task:class {constructor(definition,scope,name,source,execution){Object.assign(this,{definition,scope,name,source,execution});}},
@@ -56,6 +57,8 @@ test('activation, active workspace, saving, task arguments and busy guard', asyn
     assert.equal(task.execution.executable,path.join(sdk,'scripts/rv32-project'));
   }
   mock.window.activeTextEditor.document.uri.fsPath=path.join(root,'main.rs');
+  await editorChanged();
+  assert.deepEqual(contexts.at(-1), ['rv32.project', true]);
   await commands.get('rv32.simulate')();
   assert.deepEqual(executed.at(-1).execution.args,['--project',root,'simulate']);
   assert.equal(saved,3);
